@@ -81,13 +81,15 @@ async function attempt_connect() {
 
     if (res.status === 429) {
         const reset = res.headers.get("X-RateLimit-Reset");
+        const servertime = res.headers.get("X-ServerTime");
 
-        if (!reset) {
+        if (!reset || !servertime) {
             return show_error("error: please wait another minute before trying again");
         }
 
-        const timestamp = parseInt(reset) * 1000;
-        const ms = timestamp - Date.now();
+        const stimestamp = parseInt(servertime) * 1000;
+        const rtimestamp = parseInt(reset) * 1000;
+        const ms = rtimestamp - stimestamp;
 
         return show_error("error: please wait " + Math.ceil(ms / 1000) + " seconds before trying again")
     }

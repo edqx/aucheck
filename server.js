@@ -29,6 +29,11 @@ const resolveDns = util.promisify(dns.resolve);
 
 server.use(bodyParser.json());
 
+server.use((req, res, next) => {
+    res.setHeader("X-ServerTime", Date.now());
+    next();
+});
+
 server.get("/", (req, res) => {
     res.sendFile(path.resolve(public_dir, "./index.html"));
 });
