@@ -2,8 +2,7 @@
 
 body, html {
     margin: 0px;
-    padding: 0;
-    width: 100%;
+    padding: 8px;
     background-color: #444a6c;
     color: #edf0f7;
     font-family: "Nunito", sans-serif;
