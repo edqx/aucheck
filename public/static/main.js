@@ -87,7 +87,7 @@ async function attempt_connect() {
             return show_error("error: please wait another minute before trying again");
         }
 
-        const stimestamp = parseInt(servertime) * 1000;
+        const stimestamp = parseInt(servertime);
         const rtimestamp = parseInt(reset) * 1000;
         const ms = rtimestamp - stimestamp;
 

@@ -92,7 +92,7 @@ server.post("/invoke", async (req, res, next) => {
     next();
 });
 
-if (process.env.NODE_ENV !== "development") {
+if (process.env.NODE_ENV === "development") {
     server.use("/invoke", ratelimit({ windowMs: 15 * 1000, max: 1 }));
 }
 
