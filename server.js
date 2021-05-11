@@ -50,7 +50,9 @@ const invokeSchema = zod.object({
     )
 });
 
-server.post("/invoke", ratelimit({ windowMs: 30 * 1000, max: 1 }), async (req, res) => {
+const ip_regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+
+server.post("/invoke", async (req, res, next) => {
     if (!invokeSchema.check(req.body)) {
         return res.status(400).json({ reason: "BAD_REQUEST" });
     }
@@ -58,11 +60,11 @@ server.post("/invoke", ratelimit({ windowMs: 30 * 1000, max: 1 }), async (req, r
     if (!req.body.ip)
         return res.status(400).json({ reason: "INVALID_IP" });
 
-    const port = req.body.port || 22023;
-
-    const check = checkIp(req.body.ip);
-    if (!check.isValid || !check.isPublicIp) {
-        return res.status(400).json({ reason: "INVALID_IP" });
+    if (ip_regex.test(req.body.ip)) {
+        const check = checkIp(req.body.ip);
+        if (!check.isValid || !check.isPublicIp) {
+            return res.status(400).json({ reason: "INVALID_IP" });
+        }
     }
 
     try {
@@ -77,10 +79,14 @@ server.post("/invoke", ratelimit({ windowMs: 30 * 1000, max: 1 }), async (req, r
                 return res.status(400).json({ reason: "BLOCKED" });
             }
         }
-    } catch (e) {
+    } catch (e) {}
 
-    }
-    
+    next();
+});
+
+server.post("/invoke", ratelimit({ windowMs: 30 * 1000, max: 1 }), async (req, res) => {
+    const port = req.body.port || 22023;
+
     try {
         const client = new skeldjs.SkeldjsClient(req.body.client_version);
 
