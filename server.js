@@ -119,7 +119,7 @@ server.post("/invoke",  async (req, res) => {
                         "aucheck",
                         0,
                         1,
-                        0
+                        req.body.mods.length
                     )
                 );
         
