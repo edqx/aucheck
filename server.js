@@ -196,19 +196,27 @@ server.post("/invoke", ratelimit({ windowMs: 30 * 1000, max: 1 }), async (req, r
 });
 
 (async () => {
-    const blocked_txt = await fs.readFile(path.resolve(process.cwd(), "./blocked.txt"), "utf8");
+    try {
+        const blocked_txt = await fs.readFile(path.resolve(process.cwd(), "./blocked.txt"), "utf8");
 
-    const all_blocked = blocked_txt.split("\n");
+        const all_blocked = blocked_txt.split("\n");
 
-    for (const blocked of all_blocked) {
-        blocked_ips.add(blocked);
-        try {
-            const addrs = await resolveDns(blocked);
-            
-            for (const addr of addrs) {
-                blocked_ips.add(addr);
-            }
-        } catch (e) {}
+        for (const blocked of all_blocked) {
+            blocked_ips.add(blocked);
+            try {
+                const addrs = await resolveDns(blocked);
+                
+                for (const addr of addrs) {
+                    blocked_ips.add(addr);
+                }
+            } catch (e) {}
+        }
+    } catch (e) {
+        if (e.code === "ENOENT") {
+            await fs.writeFile(path.resolve(process.cwd(), "./blocked.txt"), "", "utf8");
+        } else {
+            throw e;
+        }
     }
 
     server.listen(port, () => {
