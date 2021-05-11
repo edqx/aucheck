@@ -73,7 +73,8 @@ async function attempt_connect() {
                 code: eGameCode.value,
                 client_version: eClientVersion.value || "2021.4.2",
                 reactor_handshake: eReactorHandshake.getAttribute("checked") === "true",
-                mods
+                mods,
+                get_ping: true
             })
         }
     );
@@ -94,7 +95,7 @@ async function attempt_connect() {
     const json = await res.json();
 
     if (res.status === 200) {
-        show_success("your server appears to be working fine");
+        show_success("your server appears to be working fine, ping: " + json.ping + "ms");
     } else {
         show_error(json.reason ? error_codes[json.reason] : error_codes["UNKNOWN"]);
     }

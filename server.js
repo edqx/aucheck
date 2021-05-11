@@ -10,7 +10,7 @@ const checkIp = require("check-ip");
 
 const skeldjs = require("@skeldjs/client");
 const amongus = require("@skeldjs/constant");
-const { AcknowledgePacket, ReliablePacket } = require("@skeldjs/protocol");
+const { AcknowledgePacket, ReliablePacket, PingPacket } = require("@skeldjs/protocol");
 
 const { ModdedHelloPacket } = require("./packets/ModdedHello");
 const { ReactorHandshakeMessage } = require("./packets/ReactorHandshake");
@@ -47,7 +47,8 @@ const invokeSchema = zod.object({
             id: zod.string(),
             version: zod.string()
         })
-    )
+    ),
+    get_ping: zod.boolean()
 });
 
 const ip_regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
@@ -187,11 +188,22 @@ server.post("/invoke", ratelimit({ windowMs: 30 * 1000, max: 1 }), async (req, r
 
             return res.status(200).json({ success: true });
         }
-        
-        await client.disconnect();
-        client.destroy();
 
-        return res.status(200).json({ success: true });
+        if (req.body.get_ping) {
+            const now = Date.now();
+            const nonce = client.getNextNonce();
+            await client.send(new PingPacket(nonce));
+            
+            await client.decoder.waitf(AcknowledgePacket, ack => ack.nonce ===  nonce);
+            const ms = Date.now() - now;
+            
+            await client.disconnect();
+            client.destroy();
+
+            return res.status(200).json({ success: true, ping: ms });
+        } else {
+            return res.status(200).json({ success: true });
+        }
     } catch (e) {
         if (e.code === "ENOTFOUND") {
             return res.status(400).json({ reason: "INVALID_IP" });
