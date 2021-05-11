@@ -200,6 +200,9 @@ server.post("/invoke", ratelimit({ windowMs: 30 * 1000, max: 1 }), async (req, r
 
         return res.status(200).json({ success: true });
     } catch (e) {
+        if (e.code === "ENOTFOUND") {
+            return res.status(400).json({ reason: "INVALID_IP" });
+        }
         console.log(e);
         return res.status(500).json({ reason: "UNKNOWN" });
     }

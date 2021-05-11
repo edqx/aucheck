@@ -20,9 +20,9 @@ const eAllToggleButtons = document.querySelectorAll("button.toggle");
 const mods = [];
 
 const error_codes = {
-    "INVALID_IP": "error: ip given was invalid",
+    "INVALID_IP": "error: the ip or dns you entered was invalid",
     "BAD_REQUEST": "error: something went wrong with the request",
-    "TIMED_OUT_CONNECTING": "error: the client timed out while trying to identify with your server",
+    "TIMED_OUT_CONNECTING": "error: the client timed out while trying to identify with the server",
     "TIMED_OUT_JOINING": "error: the client timed out while trying to join the room",
     "JOIN_FAIL": "error: the client failed to join the room",
     "TIMED_OUT_CREATING": "error: the client timed out while trying to create a room",
@@ -51,10 +51,10 @@ function show_error(err) {
 }
 
 async function attempt_connect() {
-    show_message("Attempting to connect..");
-
     if (!eIpAddress.value)
         return;
+
+    show_message("Attempting to connect..");
 
     const res = await fetch("/invoke",
         {
