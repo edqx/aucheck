@@ -1,0 +1,129 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito&display=swap");
+
+body, html {
+    margin: 0px;
+    padding: 0;
+    width: 100%;
+    background-color: #444a6c;
+    color: #edf0f7;
+    font-family: "Nunito", sans-serif;
+    text-align: center;
+}
+
+a {
+    cursor: pointer;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+input {
+    padding: 6px;
+    padding-left: 14px;
+    padding-right: 14px;
+    margin: 3px;
+    border-radius: 16px;
+    outline: none;
+    border: none;
+    color: #edf0f7;
+    background-color: #4f577d;
+    box-shadow: 0px 0px 60px 0px rgba(0,0,0,0.5);
+    font-family: "Nunito", sans-serif;
+}
+
+button {
+    padding: 6px;
+    padding-left: 14px;
+    padding-right: 14px;
+    margin: 3px;
+    border-radius: 16px;
+    outline: none;
+    border: none;
+    color: #edf0f7;
+    background-color: #4a71e9;
+    box-shadow: 0px 0px 60px 0px rgba(0,0,0,0.5);
+    font-family: "Nunito", sans-serif;
+    cursor: pointer;
+}
+
+button.toggle[checked="true"] {
+    background-color: rgb(45, 138, 45);
+}
+
+button.toggle[checked="false"] {
+    background-color: rgb(206, 76, 76);
+}
+
+.centre-container {
+    margin-top: 10%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.title {
+    font-size: 32pt;
+}
+
+.server-info {
+    display: flex;
+}
+
+.description {
+    margin-bottom: 14px;
+}
+
+.ip {
+    width: 120px;
+}
+
+.port, .mod-version {
+    width: 40px;
+}
+
+.client-version {
+    width: 80px;
+}
+
+.mod-id {
+    width: 140px;
+}
+
+.result {
+    margin-top: 8px;
+}
+
+.result.error {
+    color: rgb(206, 76, 76);
+}
+
+.result.success {
+    color: rgb(90, 116, 220);
+}
+
+.show-advanced {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.advanced-wrapper {
+    display: none;
+    flex-direction: column;
+    width: 300px;
+}
+
+.advanced-option {
+    display: flex;
+    align-items: center;
+}
+
+.advanced-label {
+    flex: 1 1 0;
+    text-align: left;
+}
+
+.advanced-action {
+    flex: 0 1 0;
+    text-align: right;
+}

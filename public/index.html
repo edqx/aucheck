@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/main.css">
+    <script src="/static/main.js" defer></script>
+    <title>AUCheck</title>
+</head>
+<body>
+    <div class="centre-container">
+        <span class="title">au check</span><br>
+        <span class="description">test your hosted among us server to make sure it works for other players</span>
+        <div class="server-info">
+            <input class="ip" placeholder="ip address">
+            <input class="port" placeholder="port" value=22023>
+            <button class="submit">go</button>
+        </div>
+        <div class="result">&nbsp;</div>
+        <a class="show-advanced">click to show advanced options</a>
+        <div class="advanced-wrapper">
+            <div class="advanced-option">
+                <span class="advanced-label">client version</span>
+                <input class="advanced-action client-version" value="2021.4.2s"></input>
+            </div>
+            <div class="advanced-option">
+                <span class="advanced-label">use reactor handshake</span>
+                <button class="advanced-action toggle reactor-handshake" default="true"></button>
+            </div>
+            <div>
+                <span class="advanced-label">mod list</span><br>
+                <div class="mod-list">
+                </div>
+                <input class="mod-id" placeholder="mod id"></input>
+                <input class="mod-version" placeholder="version"></input>
+                <button class="create-mod">+</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
