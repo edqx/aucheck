@@ -85,7 +85,7 @@ server.post("/invoke", async (req, res, next) => {
     next();
 });
 
-server.post("/invoke", ratelimit({ windowMs: 30 * 1000, max: 1 }), async (req, res) => {
+server.post("/invoke", ratelimit({ windowMs: 15 * 1000, max: 1 }), async (req, res) => {
     const port = req.body.port || 22023;
 
     try {
