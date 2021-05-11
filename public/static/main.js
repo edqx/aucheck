@@ -101,7 +101,7 @@ async function attempt_connect() {
 }
 
 eButton.addEventListener("click", attempt_connect);
-/*
+
 let showing_advanced = false;
 
 function toggle_advanced() {
@@ -116,7 +116,7 @@ function toggle_advanced() {
     }
 }
 
-eShowAdvanced.addEventListener("click", toggle_advanced);*/
+eShowAdvanced.addEventListener("click", toggle_advanced);
 
 for (const button of eAllToggleButtons) {
     const val = button.getAttribute("default") || "true";

@@ -139,7 +139,7 @@ select {
 }
 
 .advanced-wrapper {
-    /* display: none; */
+    display: none;
     flex-direction: column;
     width: 300px;
 }
