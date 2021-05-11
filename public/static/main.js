@@ -9,11 +9,15 @@ const eAdvanced = document.querySelector(".advanced-wrapper");
 
 const eClientVersion = document.querySelector(".client-version");
 const eReactorHandshake = document.querySelector(".reactor-handshake");
+const eMode = document.querySelector(".check-mode");
+const eGameCode = document.querySelector(".game-code");
 
 const eModList = document.querySelector(".mod-list");
 const eModId = document.querySelector(".mod-id");
 const eModVersion = document.querySelector(".mod-version");
 const eCreateMod = document.querySelector(".create-mod");
+
+const eGameCodeWrapper = document.querySelector(".game-code-wrapper");
 
 const eAllToggleButtons = document.querySelectorAll("button.toggle");
 
@@ -27,7 +31,7 @@ const error_codes = {
     "JOIN_FAIL": "error: the client failed to join the room",
     "TIMED_OUT_CREATING": "error: the client timed out while trying to create a room",
     "CREATE_FAIL": "error: the client failed to create a room",
-    "OFFICIALS": "error: don't use official servers to test on",
+    "BLOCKED": "error: that ip or dns is blocked",
     "UNKNOWN": "error: an unknown error occurred, please contact edward#2222 on discord"
 }
 
@@ -65,8 +69,8 @@ async function attempt_connect() {
             body: JSON.stringify({
                 ip: eIpAddress.value,
                 port: parseInt(ePort.value) || 22023,
-                mode: "create",
-                code: "",
+                mode: eMode.value,
+                code: eGameCode.value,
                 client_version: eClientVersion.value || "2021.4.2",
                 reactor_handshake: eReactorHandshake.getAttribute("checked") === "true",
                 mods
@@ -97,7 +101,7 @@ async function attempt_connect() {
 }
 
 eButton.addEventListener("click", attempt_connect);
-
+/*
 let showing_advanced = false;
 
 function toggle_advanced() {
@@ -112,7 +116,7 @@ function toggle_advanced() {
     }
 }
 
-eShowAdvanced.addEventListener("click", toggle_advanced);
+eShowAdvanced.addEventListener("click", toggle_advanced);*/
 
 for (const button of eAllToggleButtons) {
     const val = button.getAttribute("default") || "true";
@@ -180,3 +184,13 @@ function on_create_mod_click() {
 eCreateMod.addEventListener("click", on_create_mod_click);
 
 create_mod("gg.reactor.api", "0.4.0-ci.54");
+
+function on_mode_select() {
+    eGameCodeWrapper.style.display =
+        eMode.value === "join"
+            ? "flex"
+            : "none";
+}
+
+eMode.addEventListener("change", on_mode_select);
+on_mode_select();

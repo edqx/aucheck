@@ -18,24 +18,45 @@
             <button class="submit">go</button>
         </div>
         <div class="result">&nbsp;</div>
-        <a class="show-advanced">click to show advanced options</a>
+        <!--<a class="show-advanced">click to show advanced options</a>-->
+        advanced options
         <div class="advanced-wrapper">
             <div class="advanced-option">
                 <span class="advanced-label">client version</span>
-                <input class="advanced-action client-version" value="2021.4.2s"></input>
+                <input class="advanced-action client-version" placeholder="version" value="2021.4.2s"></input>
             </div>
             <div class="advanced-option">
                 <span class="advanced-label">use reactor handshake</span>
                 <button class="advanced-action toggle reactor-handshake" default="true"></button>
             </div>
-            <div>
-                <span class="advanced-label">mod list</span><br>
-                <div class="mod-list">
-                </div>
-                <input class="mod-id" placeholder="mod id"></input>
-                <input class="mod-version" placeholder="version"></input>
-                <button class="create-mod">+</button>
+            <div class="advanced-option">
+                <span class="advanced-label">check mode</span>
+                <select class="advanced-action toggle check-mode">
+                    <option value="identify">identify</option>
+                    <option value="join">join</option>
+                    <option value="create">create</option>
+                </select>
             </div>
+            <div class="advanced-option game-code-wrapper" style="display: none;">
+                <span class="advanced-label">game code</span>
+                <input class="advanced-action game-code" placeholder="game code" maxlength="6"></input>
+            </div>
+            <div style="margin-top: 8px;">
+                <span class="advanced-label">mod list</span><br>
+                <div class="mod-list" style="margin-top: 4px;">
+                </div>
+                <div class="mod-item">
+                    <input class="mod-id" placeholder="mod id"></input>
+                    <input class="mod-version" placeholder="version"></input>
+                    <button class="create-mod">+</button>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <a class="github" href="https://github.com/edqx">
+                <img src="/static/github.png" height=24/>
+                <span class="gh-username">edqx</span>
+            </a>
         </div>
     </div>
 </body>

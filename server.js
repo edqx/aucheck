@@ -1,10 +1,13 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs/promises");
 const dns = require("dns");
 const util = require("util");
 const ratelimit = require("express-rate-limit");
 const bodyParser = require("body-parser");
 const zod = require("zod");
+const checkIp = require("check-ip");
+
 const skeldjs = require("@skeldjs/client");
 const amongus = require("@skeldjs/constant");
 const { AcknowledgePacket, ReliablePacket } = require("@skeldjs/protocol");
@@ -21,6 +24,9 @@ const server = express();
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+const blocked_ips = new Set;
+const resolveDns = util.promisify(dns.resolve);
+
 server.use(bodyParser.json());
 
 server.get("/", (req, res) => {
@@ -32,7 +38,7 @@ server.use("/static", express.static(path.resolve(public_dir, "./static")));
 const invokeSchema = zod.object({
     ip: zod.string(),
     port: zod.number().int(),
-    mode: zod.string().refine(str => str === "join" || str === "create"),
+    mode: zod.string().refine(str => str === "join" || str === "create" || str === "identify"),
     code: zod.string(),
     client_version: zod.string(),
     reactor_handshake: zod.boolean(),
@@ -44,30 +50,6 @@ const invokeSchema = zod.object({
     )
 });
 
-const officials = [
-    "eu.mm.among.us",
-    "na.mm.among.us",
-    "as.mm.among.us"
-];
-
-const blocked_ips = new Set;
-
-(async () => {
-    for (const official of officials) {
-        dns.resolve(official, (err, addrs) => {
-            if (err) {
-                console.log("There was an error resolving DNS for", official);
-                console.log(err);
-                return;
-            }
-
-            for (const addr of addrs) {
-                blocked_ips.add(addr);
-            }
-        });
-    }
-})();
-
 server.post("/invoke", ratelimit({ windowMs: 30 * 1000, max: 1 }), async (req, res) => {
     if (!invokeSchema.check(req.body)) {
         return res.status(400).json({ reason: "BAD_REQUEST" });
@@ -78,16 +60,21 @@ server.post("/invoke", ratelimit({ windowMs: 30 * 1000, max: 1 }), async (req, r
 
     const port = req.body.port || 22023;
 
+    const check = checkIp(req.body.ip);
+    if (!check.isValid || !check.isPublicIp) {
+        return res.status(400).json({ reason: "INVALID_IP" });
+    }
+
     try {
-        const addrs = await util.promisify(dns.resolve)(req.body.ip);
+        const addrs = await resolveDns(req.body.ip);
 
         if (blocked_ips.has(req.body.ip)) {
-            return res.status(400).json({ reason: "OFFICIALS" });
+            return res.status(400).json({ reason: "BLOCKED" });
         }
 
         for (const addr of addrs) {
             if (blocked_ips.has(addr)) {
-                return res.status(400).json({ reason: "OFFICIALS" });
+                return res.status(400).json({ reason: "BLOCKED" });
             }
         }
     } catch (e) {
@@ -167,7 +154,7 @@ server.post("/invoke", ratelimit({ windowMs: 30 * 1000, max: 1 }), async (req, r
                 client.destroy();
                 return res.status(500).json({ reason: "JOIN_FAIL" });
             }
-        } else {
+        } else if (req.body.mode === "create") {
             try {
                 const code = await Promise.race([
                     sleep(3000),
@@ -208,6 +195,23 @@ server.post("/invoke", ratelimit({ windowMs: 30 * 1000, max: 1 }), async (req, r
     }
 });
 
-server.listen(port, () => {
-    console.log("Listening on *:" + port);
-});
+(async () => {
+    const blocked_txt = await fs.readFile(path.resolve(process.cwd(), "./blocked.txt"), "utf8");
+
+    const all_blocked = blocked_txt.split("\n");
+
+    for (const blocked of all_blocked) {
+        blocked_ips.add(blocked);
+        try {
+            const addrs = await resolveDns(blocked);
+            
+            for (const addr of addrs) {
+                blocked_ips.add(addr);
+            }
+        } catch (e) {}
+    }
+
+    server.listen(port, () => {
+        console.log("Listening on *:" + port);
+    });
+})();
