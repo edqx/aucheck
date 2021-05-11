@@ -213,7 +213,9 @@ server.post("/invoke", ratelimit({ windowMs: 30 * 1000, max: 1 }), async (req, r
         }
     } catch (e) {
         if (e.code === "ENOENT") {
-            await fs.writeFile(path.resolve(process.cwd(), "./blocked.txt"), "", "utf8");
+            await fs.writeFile(path.resolve(process.cwd(), "./blocked.txt"), `eu.mm.among.us
+na.mm.among.us
+as.mm.among.us`, "utf8");
         } else {
             throw e;
         }
