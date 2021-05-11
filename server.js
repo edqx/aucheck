@@ -73,18 +73,21 @@ server.post("/invoke", ratelimit({ windowMs: 30 * 1000, max: 1 }), async (req, r
         return res.status(400).json({ reason: "BAD_REQUEST" });
     }
 
+    if (!req.body.ip)
+        return res.status(400).json({ reason: "INVALID_IP" });
+
     const port = req.body.port || 22023;
 
     try {
         const addrs = await util.promisify(dns.resolve)(req.body.ip);
 
         if (blocked_ips.has(req.body.ip)) {
-            return res.status(500).json({ reason: "OFFICIALS" });
+            return res.status(400).json({ reason: "OFFICIALS" });
         }
 
         for (const addr of addrs) {
             if (blocked_ips.has(addr)) {
-                return res.status(500).json({ reason: "OFFICIALS" });
+                return res.status(400).json({ reason: "OFFICIALS" });
             }
         }
     } catch (e) {

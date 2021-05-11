@@ -20,6 +20,7 @@ const eAllToggleButtons = document.querySelectorAll("button.toggle");
 const mods = [];
 
 const error_codes = {
+    "INVALID_IP": "error: ip given was invalid",
     "BAD_REQUEST": "error: something went wrong with the request",
     "TIMED_OUT_CONNECTING": "error: the client timed out while trying to identify with your server",
     "TIMED_OUT_JOINING": "error: the client timed out while trying to join the room",
@@ -52,6 +53,9 @@ function show_error(err) {
 async function attempt_connect() {
     show_message("Attempting to connect..");
 
+    if (!eIpAddress.value)
+        return;
+
     const res = await fetch("/invoke",
         {
             method: "POST",
@@ -63,7 +67,7 @@ async function attempt_connect() {
                 port: parseInt(ePort.value) || 22023,
                 mode: "create",
                 code: "",
-                client_version: eClientVersion.value || "2021.4.2.0",
+                client_version: eClientVersion.value || "2021.4.2",
                 reactor_handshake: eReactorHandshake.getAttribute("checked") === "true",
                 mods
             })
