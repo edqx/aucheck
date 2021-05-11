@@ -66,10 +66,12 @@ server.post("/invoke", async (req, res, next) => {
     if (!req.body.ip)
         return res.status(400).json({ reason: "INVALID_IP" });
 
-    if (ip_regex.test(req.body.ip)) {
-        const check = checkIp(req.body.ip);
-        if (!check.isValid || !check.isPublicIp) {
-            return res.status(400).json({ reason: "INVALID_IP" });
+    if (process.env.NODE_ENV !== "development") {
+        if (ip_regex.test(req.body.ip)) {
+            const check = checkIp(req.body.ip);
+            if (!check.isValid || !check.isPublicIp) {
+                return res.status(400).json({ reason: "INVALID_IP" });
+            }
         }
     }
 
@@ -90,7 +92,11 @@ server.post("/invoke", async (req, res, next) => {
     next();
 });
 
-server.post("/invoke", ratelimit({ windowMs: 15 * 1000, max: 1 }), async (req, res) => {
+if (process.env.NODE_ENV !== "development") {
+    server.use("/invoke", ratelimit({ windowMs: 15 * 1000, max: 1 }));
+}
+
+server.post("/invoke",  async (req, res) => {
     const port = req.body.port || 22023;
 
     try {
