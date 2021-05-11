@@ -3,11 +3,6 @@ const { BaseReactorMessage } = require("./BaseReactorMessage");
 class ReactorModDeclarationMessage extends BaseReactorMessage {
     static tag = 1;
     tag = 1;
-    
-    netid;
-    modid;
-    version;
-    side;
 
     constructor(
         netid,

@@ -3,10 +3,6 @@ const { BaseReactorMessage } = require("./BaseReactorMessage");
 class ReactorHandshakeMessage extends BaseReactorMessage {
     static tag = 0;
     tag = 0;
-    
-    servername;
-    serverver;
-    plugincount;
 
     constructor(
         servername,
