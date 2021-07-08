@@ -10,12 +10,9 @@ const checkIp = require("check-ip");
 
 const skeldjs = require("@skeldjs/client");
 const amongus = require("@skeldjs/constant");
-const { AcknowledgePacket, ReliablePacket, PingPacket } = require("@skeldjs/protocol");
-
-const { ModdedHelloPacket } = require("./packets/ModdedHello");
-const { ReactorHandshakeMessage } = require("./packets/ReactorHandshake");
-const { ReactorMessage } = require("./packets/ReactorMessage");
-const { ReactorModDeclarationMessage } = require("./packets/ReactorModDeclaration");
+const { ReactorClient, ReactorMod, ModPluginSide } = require("@skeldjs/reactor");
+const { AcknowledgePacket, PingPacket, JoinGameMessage } = require("@skeldjs/protocol");
+const { DisconnectReason } = require("@skeldjs/constant");
 
 const port = process.env.PORT || 8080;
 const public_dir = path.resolve(__dirname, "./public");
@@ -47,6 +44,7 @@ const invokeSchema = zod.object({
     code: zod.string(),
     client_version: zod.string(),
     reactor_handshake: zod.boolean(),
+    attempt_auth: zod.boolean(),
     mods: zod.array(
         zod.object({
             id: zod.string(),
@@ -96,60 +94,45 @@ if (process.env.NODE_ENV !== "development") {
     server.use("/invoke", ratelimit({ windowMs: 15 * 1000, max: 1 }));
 }
 
-server.post("/invoke",  async (req, res) => {
+server.post("/invoke", async (req, res) => {
+    const origResStatus = res.status.bind(res);
+    res.status = code => res.headersSent ? { json() {} } : origResStatus(code);
+
     const port = req.body.port || 22023;
 
     try {
-        const client = new skeldjs.SkeldjsClient(req.body.client_version);
+        const client = new skeldjs.SkeldjsClient(req.body.client_version, {
+            attemptAuth: req.body.attempt_auth
+        });
+        
+        // impostor sucks
+        client.decoder.on(JoinGameMessage, message => {
+            if (message.error === DisconnectReason.IncorrectVersion) {
+                client.destroy();
+                return res.status(500).json({ reason: "BAD_VERSION" });
+            } else {
+                client.destroy();
+                return res.status(500).json({ reason: "JOIN_FAIL" });
+            }
+        });
 
         if (req.body.reactor_handshake) {
-            client.decoder.register(ModdedHelloPacket);
-            client.decoder.register(ReactorHandshakeMessage);
-            client.decoder.register(ReactorMessage);
-            client.decoder.register(ReactorModDeclarationMessage);
-    
-            client.on("client.connect", async ev => {
-                ev.cancel();
-    
-                const nonce = client.getNextNonce();
-                await client.send(
-                    new ModdedHelloPacket(
-                        nonce,
-                        client.version,
-                        "aucheck",
-                        0,
-                        1,
-                        req.body.mods.length
+            const reactor = new ReactorClient(client);
+
+            for (const mod of req.body.mods) {
+                reactor.registerMod(
+                    new ReactorMod(
+                        mod.id,
+                        mod.version,
+                        ModPluginSide.Both
                     )
                 );
-        
-                await client.decoder.waitf(AcknowledgePacket, ack => ack.nonce ===  nonce);
-        
-                client.identified = true;
-                client.username = "aucheck";
-                client.token = 0;
-    
-                await client.send(
-                    new ReliablePacket(
-                        client.getNextNonce(),
-                        req.body.mods.map((mod, i) => {
-                            return new ReactorMessage(
-                                new ReactorModDeclarationMessage(
-                                    i,
-                                    mod.id,
-                                    mod.version,
-                                    1
-                                )
-                            )
-                        })
-                    )
-                );
-            });
+            }
         }
 
         const connect = await Promise.race([
-            sleep(3000),
-            client.connect(req.body.ip, "aucheck", 0, port).then(() => true)
+            sleep(7000),
+            client.connect(req.body.ip, "aucheck", port).then(() => true)
         ]);
 
         if (!connect) {
@@ -193,18 +176,12 @@ server.post("/invoke",  async (req, res) => {
                 console.log(e);
                 return res.status(500).json({ reason: "CREATE_FAIL" });
             }
-
-            await client.disconnect();
-            client.destroy();
-
-            return res.status(200).json({ success: true });
         }
 
         if (req.body.get_ping) {
             const now = Date.now();
             const nonce = client.getNextNonce();
             await client.send(new PingPacket(nonce));
-            
             await client.decoder.waitf(AcknowledgePacket, ack => ack.nonce ===  nonce);
             const ms = Date.now() - now;
             
@@ -213,6 +190,9 @@ server.post("/invoke",  async (req, res) => {
 
             return res.status(200).json({ success: true, ping: ms });
         } else {
+            await client.disconnect();
+            client.destroy();
+            
             return res.status(200).json({ success: true });
         }
     } catch (e) {

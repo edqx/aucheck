@@ -7,6 +7,7 @@ const ePort = document.querySelector(".port");
 const eShowAdvanced = document.querySelector(".show-advanced");
 const eAdvanced = document.querySelector(".advanced-wrapper");
 
+const eAttmeptAuth = document.querySelector(".attempt-auth");
 const eClientVersion = document.querySelector(".client-version");
 const eReactorHandshake = document.querySelector(".reactor-handshake");
 const eMode = document.querySelector(".check-mode");
@@ -29,6 +30,7 @@ const error_codes = {
     "TIMED_OUT_CONNECTING": "error: the client timed out while trying to identify with the server",
     "TIMED_OUT_JOINING": "error: the client timed out while trying to join the room",
     "JOIN_FAIL": "error: the client failed to join the room",
+    "BAD_VERSION": "error: the server doesn't accept the version that you entered (see advanced options)",
     "TIMED_OUT_CREATING": "error: the client timed out while trying to create a room",
     "CREATE_FAIL": "error: the client failed to create a room",
     "BLOCKED": "error: that ip or dns is blocked",
@@ -73,6 +75,7 @@ async function attempt_connect() {
                 code: eGameCode.value,
                 client_version: eClientVersion.value || "2021.4.2",
                 reactor_handshake: eReactorHandshake.getAttribute("checked") === "true",
+                attempt_auth: eAttmeptAuth.getAttribute("checked") === "true",
                 mods,
                 get_ping: true
             })
