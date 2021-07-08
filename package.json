@@ -8,10 +8,10 @@
     "dev": "cross-env NODE_ENV=development node ./server"
   },
   "dependencies": {
-    "@skeldjs/client": "^2.11.6",
-    "@skeldjs/constant": "^2.11.6",
-    "@skeldjs/protocol": "^2.11.6",
-    "@skeldjs/reactor": "^2.11.6",
+    "@skeldjs/client": "^2.11.8",
+    "@skeldjs/constant": "^2.11.8",
+    "@skeldjs/protocol": "^2.11.8",
+    "@skeldjs/reactor": "^2.11.8",
     "body-parser": "^1.19.0",
     "check-ip": "^1.1.1",
     "express": "^4.17.1",
