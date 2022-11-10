@@ -101,7 +101,9 @@ server.post("/invoke", async (req, res) => {
     const port = req.body.port || 22023;
 
     try {
-        const client = new skeldjs.SkeldjsClient(req.body.client_version, {
+        const client = new skeldjs.SkeldjsClient(req.body.client_version, "aucheck", {
+            useHttpMatchmaker: false,
+            authMethod: skeldjs.AuthMethod.None,
             attemptAuth: req.body.attempt_auth
         });
         
@@ -132,7 +134,7 @@ server.post("/invoke", async (req, res) => {
 
         const connect = await Promise.race([
             sleep(7000),
-            client.connect(req.body.ip, "aucheck", port).then(() => true)
+            client.connect(req.body.ip, port).then(() => true)
         ]);
 
         if (!connect) {
@@ -181,16 +183,16 @@ server.post("/invoke", async (req, res) => {
         if (req.body.get_ping) {
             const now = Date.now();
             const nonce = client.getNextNonce();
-            await client.send(new PingPacket(nonce));
-            await client.decoder.waitf(AcknowledgePacket, ack => ack.nonce ===  nonce);
+            client.send(new PingPacket(nonce));
+            await client.decoder.waitf(AcknowledgePacket, ack => (console.log(ack), ack.nonce === nonce));
             const ms = Date.now() - now;
             
-            await client.disconnect();
+            client.disconnect();
             client.destroy();
 
             return res.status(200).json({ success: true, ping: ms });
         } else {
-            await client.disconnect();
+            client.disconnect();
             client.destroy();
             
             return res.status(200).json({ success: true });
